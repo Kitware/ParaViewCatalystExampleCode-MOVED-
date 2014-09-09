@@ -19,6 +19,18 @@
 // Creates the data container for the CoProcessor.
 extern "C" void createcpimagedata_(int* dimensions, int* extent)
 {
+  if (!vtkCPPythonAdaptorAPI::GetCoProcessorData())
+    {
+    vtkGenericWarningMacro("Unable to access CoProcessorData.");
+    return;
+    }
+
+  // The simulation grid is a 3-dimensional topologically and geometrically
+  // regular grid. In VTK/ParaView, this is considered an image data set.
+  vtkSmartPointer<vtkImageData> grid = vtkSmartPointer<vtkImageData>::New();
+
+  // Name should be consistent between here, Fortran and Python client script.
+  vtkCPPythonAdaptorAPI::GetCoProcessorData()->GetInputDescriptionByName("input")->SetGrid(grid);
 }
 
 // Add field(s) to the data container.

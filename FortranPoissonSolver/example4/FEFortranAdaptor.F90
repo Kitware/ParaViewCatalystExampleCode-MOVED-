@@ -9,11 +9,12 @@ contains
     integer :: ilen, i
     character(len=200) :: arg
 
+    call coprocessorinitialize()
     do i=1, iargc()
        call getarg(i, arg)
        ilen = len_trim(arg)
        arg(ilen+1:) = char(0)
-
+       call coprocessoraddpythonscript(arg, ilen)
     enddo
   end subroutine initializecoprocessor
 
@@ -26,9 +27,14 @@ contains
     integer :: flag, extent(6)
     real(kind=8), DIMENSION(:), allocatable :: xcp(:)
 
+    call requestdatadescription(step,time,flag)
     if (flag .ne. 0) then
-        call getvtkextent(dimensions, extent)
+       call needtocreategrid(flag)
+       call getvtkextent(dimensions, extent)
 
+       if (flag .ne. 0) then
+          call createcpimagedata(dimensions, extent)
+       end if
        ! x is the array with global values, we need just this process's
        ! values for Catalyst which will be put in xcp
        allocate(xcp((extent(2)-extent(1)+1)*(extent(4)-extent(3)+1)*(extent(6)-extent(5)+1)))
@@ -39,7 +45,7 @@ contains
   end subroutine runcoprocessor
 
   subroutine finalizecoprocessor()
-
+    call coprocessorfinalize()
   end subroutine finalizecoprocessor
 
   ! helper methods
