@@ -7,15 +7,10 @@ PROGRAM coproc
   use ConjugateGradient ! contains solve()
   implicit none
   include 'mpif.h'
-  integer,parameter :: nx=100,ny=100,nz=100,ntime=10
-  integer :: i,j,k
-  real(kind=8) :: dxsqinverse, dysqinverse, dzsqinverse, value
-  integer :: numtasks,rank,ierr
+  integer :: numtasks,rank,ierr,allocatestatus
   integer :: dimensions(3), ownedbox(6)
   type(SparseMatrixData) :: sm
-  integer :: numx, numy, numz, row, allocatestatus
   real(kind=8), DIMENSION(:), allocatable :: x, rhs
-  real(kind=8) :: rhs2(125)
 
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, numtasks, ierr)
@@ -41,7 +36,7 @@ PROGRAM coproc
 
   call fillmatrixandrhs(sm, rhs, ownedbox, dimensions)
 
-  call solve(dimensions, sm, x, rhs2)
+  call solve(dimensions, sm, x, rhs)
 
 #ifdef USE_CATALYST
   call finalizecoprocessor()
