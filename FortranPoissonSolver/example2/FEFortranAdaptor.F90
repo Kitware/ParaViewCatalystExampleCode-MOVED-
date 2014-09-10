@@ -29,7 +29,7 @@ contains
 
     call requestdatadescription(step,time,flag)
     if (flag .ne. 0) then
-        call getvtkextent(dimensions, extent)
+       call getvtkextent(dimensions, extent)
 
        ! x is the array with global values, we need just this process's
        ! values for Catalyst which will be put in xcp
