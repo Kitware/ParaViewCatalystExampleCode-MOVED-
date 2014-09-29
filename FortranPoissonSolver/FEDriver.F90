@@ -1,10 +1,11 @@
 PROGRAM coproc
 #ifdef USE_CATALYST
-  use tcp               ! ParaView Catalyst adaptor
+  use CoProcessor               ! ParaView Catalyst adaptor
 #endif
-  use SparseMatrix      ! contains initialize() and finalize()
-  use PoissonDiscretization ! contains fillmatrixandrhs()
-  use ConjugateGradient ! contains solve()
+  use SparseMatrix              ! contains initialize() and finalize()
+  use PoissonDiscretization     ! contains fillmatrixandrhs()
+  use ConjugateGradient         ! contains solve()
+  use Box                       ! contains getownedbox()
   implicit none
   include 'mpif.h'
   integer :: numtasks,rank,ierr,allocatestatus
@@ -20,19 +21,19 @@ PROGRAM coproc
   call initializecoprocessor()
 #endif
 
-  dimensions(1) = 5
-  dimensions(2) = 5
-  dimensions(3) = 5
+  dimensions(1) = 10
+  dimensions(2) = 10
+  dimensions(3) = 10
 
-  ! given a rank between 1 and numtasks, compute the nodes that
+  ! given a piece between 1 and numtasks, compute the nodes that
   ! are owned by this process (ownedbox)
-  call getownedbox(rank, numtasks, dimensions, ownedbox)
+  call getownedbox(rank+1, numtasks, dimensions, ownedbox)
 
   call initialize(sm, ownedbox, dimensions)
 
   ! each process has a full copy of the solution and the RHS to keep things simple
   allocate(x(dimensions(1)*dimensions(2)*dimensions(3)), rhs(dimensions(1)*dimensions(2)*dimensions(3)), STAT = allocatestatus)
-  if (allocatestatus /= 0) STOP "*** Not enough memory for arrays ***"
+  if (allocatestatus /= 0) STOP "*** FEDriver.F90: Not enough memory for arrays ***"
 
   call fillmatrixandrhs(sm, rhs, ownedbox, dimensions)
 
@@ -47,5 +48,7 @@ PROGRAM coproc
   call finalize(sm)
 
   call mpi_finalize(ierr)
+
+  write(*,*) 'Finished on rank', rank, 'of', numtasks
 
 end program coproc

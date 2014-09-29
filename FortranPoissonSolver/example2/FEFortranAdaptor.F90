@@ -1,4 +1,4 @@
-module tcp
+module CoProcessor
   implicit none
   public initializecoprocessor, runcoprocessor, finalizecoprocessor
 
@@ -46,6 +46,7 @@ contains
 
   ! helper methods
   subroutine getvtkextent(dimensions, extent)
+    use Box
     implicit none
     include 'mpif.h'
     integer, intent(in) :: dimensions(3)
@@ -54,7 +55,7 @@ contains
 
     call mpi_comm_size(MPI_COMM_WORLD, numtasks, ierr)
     call mpi_comm_rank(MPI_COMM_WORLD, rank, ierr)
-    call getlocalbox(rank, numtasks, dimensions, extent)
+    call getlocalbox(rank+1, numtasks, dimensions, extent)
   end subroutine getvtkextent
 
   subroutine getlocalfield(dimensions, extent, x, xcp)
@@ -74,5 +75,4 @@ contains
     enddo
   end subroutine getlocalfield
 
-end module tcp
-
+end module CoProcessor
