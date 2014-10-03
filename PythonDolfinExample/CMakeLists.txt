@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.8)
 project(CatalystCxxFullExample)
 
 
-find_package(ParaView 4.1 REQUIRED COMPONENTS vtkPVPythonCatalyst)
+find_package(ParaView 4.2 REQUIRED COMPONENTS vtkPVPythonCatalyst)
 include("${PARAVIEW_USE_FILE}")
 #include("${PARAVIEW_CMAKE_DIR}/ParaViewTestInstall.cmake")
 
