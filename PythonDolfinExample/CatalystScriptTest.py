@@ -21,6 +21,7 @@ def CreateCoProcessor():
       renderView1.CameraFocalPoint = [0.6346870059402945, 1.580702880997128, 0.0]
       renderView1.CameraParallelScale = 1.649915822768611
       renderView1.Background = [0.32, 0.34, 0.43]
+      renderView1.UseOffscreenRendering = True
 
       # register the view with coprocessor
       # and provide it with information such as the filename to use,
