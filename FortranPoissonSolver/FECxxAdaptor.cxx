@@ -19,6 +19,7 @@
 // Creates the data container for the CoProcessor.
 extern "C" void createcpimagedata_(int* dimensions, int* extent)
 {
+  cout << "FECxxAdaptor.cxx: Creating an image data\n";
 }
 
 // Add field(s) to the data container.
@@ -26,4 +27,5 @@ extern "C" void createcpimagedata_(int* dimensions, int* extent)
 // By hand name mangling for fortran.
 extern "C" void addfield_(double* scalars, char* name)
 {
+  cout << "FECxxAdaptor.cxx: Creating field data\n";
 }

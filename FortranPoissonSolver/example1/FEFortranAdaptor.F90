@@ -9,11 +9,14 @@ contains
     integer :: ilen, i
     character(len=200) :: arg
 
+    write(*,*) 'FEFortranAdaptor.F90: initializing'
+
     call coprocessorinitialize()
     do i=1, iargc()
        call getarg(i, arg)
        ilen = len_trim(arg)
        arg(ilen+1:) = char(0)
+       write(*,*) 'FEFortranAdaptor.F90: adding script ', arg
        call coprocessoraddpythonscript(arg, ilen)
     enddo
   end subroutine initializecoprocessor
@@ -27,6 +30,9 @@ contains
     integer :: flag, extent(6)
     real(kind=8), DIMENSION(:), allocatable :: xcp(:)
 
+    write(*,*) 'FEFortranAdaptor.F90: running coprocessor'
+
+    flag = 0
     if (flag .ne. 0) then
        call getvtkextent(dimensions, extent)
 
@@ -40,6 +46,7 @@ contains
   end subroutine runcoprocessor
 
   subroutine finalizecoprocessor()
+    write(*,*) 'FEFortranAdaptor.F90: finalizing'
     call coprocessorfinalize()
   end subroutine finalizecoprocessor
 

@@ -11,7 +11,7 @@ set(SOURCES
 
 set(USE_CATALYST ON CACHE BOOL "Link the simulator with Catalyst")
 if(USE_CATALYST)
-  find_package(ParaView 4.2 REQUIRED COMPONENTS vtkPVPythonCatalyst)
+  find_package(ParaView 4.2 REQUIRED COMPONENTS vtkPVPythonCatalyst vtkParallelMPI)
   include("${PARAVIEW_USE_FILE}")
   # we don't create a separate library for the adaptor here
   # since FEFortranAdaptor.F90 depends on Box.F90
@@ -26,9 +26,12 @@ else()
 endif()
 
 ADD_EXECUTABLE(FortranPoissonSolver ${SOURCES})
-TARGET_LINK_LIBRARIES(FortranPoissonSolver ${MPI_Fortran_LIBRARIES})
+TARGET_LINK_LIBRARIES(FortranPoissonSolver LINK_PRIVATE ${MPI_Fortran_LIBRARIES})
 if(USE_CATALYST)
-  TARGET_LINK_LIBRARIES(FortranPoissonSolver vtkPVPythonCatalyst vtkParallelMPI)
+  TARGET_LINK_LIBRARIES(FortranPoissonSolver LINK_PRIVATE vtkPVPythonCatalyst vtkParallelMPI)
+  include(vtkModuleMacros)
+  include(vtkMPI)
+  vtk_mpi_link(FortranPoissonSolver)
 endif()
 
 option(BUILD_TESTING "Build Testing" OFF)

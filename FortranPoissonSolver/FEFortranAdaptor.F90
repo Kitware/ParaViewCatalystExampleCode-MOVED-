@@ -9,6 +9,8 @@ contains
     integer :: ilen, i
     character(len=200) :: arg
 
+    write(*,*) 'FEFortranAdaptor.F90: initializing'
+
     do i=1, iargc()
        call getarg(i, arg)
        ilen = len_trim(arg)
@@ -25,6 +27,9 @@ contains
     integer :: flag, extent(6)
     real(kind=8), DIMENSION(:), allocatable :: xcp(:)
 
+    write(*,*) 'FEFortranAdaptor.F90: running coprocessor'
+
+    flag = 0
     if (flag .ne. 0) then
        call getvtkextent(dimensions, extent)
 
@@ -38,6 +43,7 @@ contains
   end subroutine runcoprocessor
 
   subroutine finalizecoprocessor()
+    write(*,*) 'FEFortranAdaptor.F90: finalizing'
   end subroutine finalizecoprocessor
 
   ! helper methods
