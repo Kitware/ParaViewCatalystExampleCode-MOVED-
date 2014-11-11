@@ -26,6 +26,10 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/run-original.sh @ONLY)
 
 configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/run-yours.sh.in
+    ${CMAKE_CURRENT_BINARY_DIR}/run-yours.sh @ONLY)
+
+configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/run-catalyst-step1.sh.in
     ${CMAKE_CURRENT_BINARY_DIR}/run-catalyst-step1.sh @ONLY)
 
