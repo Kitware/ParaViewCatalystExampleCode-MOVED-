@@ -142,12 +142,12 @@ while tstep < maxtimestep:
     end()
 
     # Plot solution 
-    plot(p1, title="Pressure", rescale=True)
-    plot(u1, title="Velocity", rescale=True)
+    # plot(p1, title="Pressure", rescale=True)
+    # plot(u1, title="Velocity", rescale=True)
 
     # Save to file 
-    ufile << u1
-    pfile << p1
+    # ufile << u1
+    # pfile << p1
 
     # Move to next time step
     u0.assign(u1)
