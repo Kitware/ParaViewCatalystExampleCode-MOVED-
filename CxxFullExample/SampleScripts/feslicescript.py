@@ -8,6 +8,116 @@ from paraview import coprocessing
 #--------------------------------------------------------------
 # Code generated from cpstate.py to create the CoProcessor.
 
+# FIXME RGBZ plugin path
+rgbz_path = '/Volumes/KSSD/code/ParaView/build-ninja/lib/libRGBZView.dylib'
+# --------------------- Cinema exporter definition ---------------------
+
+def CreateCinemaExporter(input, frequency):
+  from paraview import simple
+  from paraview import data_exploration as cinema
+
+  class FullAnalysis(object):
+    def __init__(self):
+      self.center_of_rotation = [34.5, 32.45, 27.95]
+      self.rotation_axis = [0.0, 0.0, 1.0]
+      self.distance = 500.0
+      self.exporters = []
+      self.analysis = cinema.AnalysisManager( 'cinema', "Cinema", "Test various cinema exporter.")
+      self.analysis.begin()
+      min = 0.0
+      max = 642.0
+      self.lut = simple.GetColorTransferFunction(
+        "velocity",
+        RGBPoints=[min, 0.23, 0.299, 0.754, (min+max)*0.5, 0.865, 0.865, 0.865, max, 0.706, 0.016, 0.15])
+      # ==
+      self.createSliceExporter()
+      self.createComposite()
+      self.createImageResampler()
+      self.simple360()
+
+    def createSliceExporter(self):
+      self.analysis.register_analysis(
+        "slice",                            # id
+        "Slice exploration",                # title
+        "Perform 10 slice along X",         # description
+        "{time}/{sliceColor}_{slicePosition}.jpg", # data structure
+        cinema.SliceExplorer.get_data_type())
+      nb_slices = 5
+      colorByArray = { "velocity": { "lut": self.lut , "type": 'POINT_DATA'} }
+      view = simple.CreateRenderView()
+
+      fng = self.analysis.get_file_name_generator("slice")
+      exporter = cinema.SliceExplorer(fng, view, input, colorByArray, nb_slices)
+      exporter.set_analysis(self.analysis)
+      self.exporters.append(exporter)
+
+    def createComposite(self):
+      try:
+        simple.LoadPlugin(rgbz_path, ns=globals())
+        self.analysis.register_analysis(
+          "composite",
+          "Composite rendering",
+          "Performing composite on contour",
+          '{time}/{theta}/{phi}/{filename}', cinema.CompositeImageExporter.get_data_type())
+        fng = self.analysis.get_file_name_generator("composite")
+
+        # Create pipeline to compose
+        color_type = [('POINT_DATA', "velocity")]
+        luts = { "velocity": self.lut }
+        filters = [ input ]
+        filters_description = [ {'name': 'catalyst'} ]
+        color_by = [ color_type ]
+
+        # Data exploration ------------------------------------------------------------
+        camera_handler = cinema.ThreeSixtyCameraHandler(fng, None, [ float(r) for r in range(0, 360, 72)], [ float(r) for r in range(-60, 61, 45)], self.center_of_rotation, self.rotation_axis, self.distance)
+        exporter = cinema.CompositeImageExporter(fng, filters, color_by, luts, camera_handler, [400,400], filters_description, 0, 0)
+        exporter.set_analysis(self.analysis)
+        self.exporters.append(exporter)
+      except:
+        print "Skip RGBZView expoter"
+
+    def createImageResampler(self):
+      self.analysis.register_analysis(
+        "interactive-prober",                          # id
+        "Interactive prober",                          # title
+        "Sample data in image stack for line probing", # description
+        "{time}/{field}/{slice}.{format}",                    # data structure
+        cinema.ImageResampler.get_data_type())
+      fng = self.analysis.get_file_name_generator("interactive-prober")
+      arrays = { "velocity" : self.lut }
+      exporter = cinema.ImageResampler(fng, input, [50,50,50], arrays)
+      self.exporters.append(exporter)
+
+    def simple360(self):
+      self.analysis.register_analysis(
+          "360",                                  # id
+          "rotation",                             # title
+          "Perform 15 contour",                   # description
+          "{time}/{theta}_{phi}.jpg", # data structure
+          cinema.ThreeSixtyImageStackExporter.get_data_type())
+      fng = self.analysis.get_file_name_generator("360")
+      arrayName = ('POINT_DATA', 'velocity')
+      view = simple.CreateRenderView()
+
+      rep = simple.Show(input, view)
+      rep.LookupTable = self.lut
+      rep.ColorArrayName = arrayName
+
+      exporter = cinema.ThreeSixtyImageStackExporter(fng, view, self.center_of_rotation, self.distance, self.rotation_axis, [20,45])
+      self.exporters.append(exporter)
+
+    def UpdatePipeline(self, time):
+      if time % frequency != 0:
+        return
+
+      # Do the exploration work
+      for exporter in self.exporters:
+        exporter.UpdatePipeline(time)
+
+    def Finalize(self):
+      self.analysis.end()
+
+  return FullAnalysis()
 
 # ----------------------- CoProcessor definition -----------------------
 
@@ -25,6 +135,9 @@ def CreateCoProcessor():
 
       SetActiveSource(filename_3_pvtu)
       ParallelUnstructuredGridWriter1 = coprocessor.CreateWriter( XMLPUnstructuredGridWriter, "fullgrid_%t.pvtu", 100 )
+
+      # Add cinema exploration
+      coprocessor.RegisterExporter(CreateCinemaExporter(filename_3_pvtu, 2))
 
     return Pipeline()
 
