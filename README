@@ -1,3 +1,7 @@
+NOTE: These examples have been moved into the main ParaView repository and
+are available at https://gitlab.kitware.com/paraview/paraview under the Examples/Catalyst
+subdirectory.
+
 This repository gives examples of how to use ParaView Catalyst (catalyst.paraview.org)
 for in situ analysis and visualization. For assistance, please email the ParaView
 mailing list at paraview@paraview.org. The examples show how to create VTK data
